@@ -1,0 +1,22 @@
+{
+  "files": {
+    "main.css": "/typing-speed-calculator/static/css/main.5f361e03.chunk.css",
+    "main.js": "/typing-speed-calculator/static/js/main.0ff6b51f.chunk.js",
+    "main.js.map": "/typing-speed-calculator/static/js/main.0ff6b51f.chunk.js.map",
+    "runtime-main.js": "/typing-speed-calculator/static/js/runtime-main.5bfe74d2.js",
+    "runtime-main.js.map": "/typing-speed-calculator/static/js/runtime-main.5bfe74d2.js.map",
+    "static/js/2.71b73f73.chunk.js": "/typing-speed-calculator/static/js/2.71b73f73.chunk.js",
+    "static/js/2.71b73f73.chunk.js.map": "/typing-speed-calculator/static/js/2.71b73f73.chunk.js.map",
+    "index.html": "/typing-speed-calculator/index.html",
+    "precache-manifest.60d1fb243cd5f18991d4e9afb98c0e05.js": "/typing-speed-calculator/precache-manifest.60d1fb243cd5f18991d4e9afb98c0e05.js",
+    "service-worker.js": "/typing-speed-calculator/service-worker.js",
+    "static/css/main.5f361e03.chunk.css.map": "/typing-speed-calculator/static/css/main.5f361e03.chunk.css.map",
+    "static/js/2.71b73f73.chunk.js.LICENSE.txt": "/typing-speed-calculator/static/js/2.71b73f73.chunk.js.LICENSE.txt"
+  },
+  "entrypoints": [
+    "static/js/runtime-main.5bfe74d2.js",
+    "static/js/2.71b73f73.chunk.js",
+    "static/css/main.5f361e03.chunk.css",
+    "static/js/main.0ff6b51f.chunk.js"
+  ]
+}
