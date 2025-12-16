@@ -24,4 +24,5 @@ yarn-error.log*
 
 *.md
 !README.md
+!SCALABILITY_PLAN.md
 
