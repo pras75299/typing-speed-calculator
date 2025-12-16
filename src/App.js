@@ -1,88 +1,96 @@
-import React, { Component } from "react";
-import "./App.css";
-import Preview from "./Preview";
-import Speed from "./Speed";
-import GetText from "./GetText";
+import React, { useEffect, useMemo, useRef, useState } from 'react';
+import './App.css';
+import Preview from './components/Preview';
+import Speed from './components/Speed';
+import getRandomText from './utils/getRandomText';
 
-const initialState = {
-  text: GetText(),
-  userInput: "",
-  symbols: 0,
-  sec: 0,
-  started: false,
-  finished: false,
-};
-class App extends Component {
-  state = initialState;
-  onRestart = () => {
-    this.setState(initialState);
-  };
-  onInputChange = (event) => {
-    const val = event.target.value;
-    this.setTimer();
-    this.onFinish(val);
-    this.setState({
-      userInput: val,
-      symbols: this.countSymbols(val),
-    });
-  };
+const App = () => {
+  const [targetText, setTargetText] = useState(() => getRandomText());
+  const [userInput, setUserInput] = useState('');
+  const [seconds, setSeconds] = useState(0);
+  const [started, setStarted] = useState(false);
+  const [finished, setFinished] = useState(false);
 
-  onFinish(userInput) {
-    if (userInput === this.state.text) {
-      clearInterval(this.interval);
-      this.setState({ finished: true });
+  const timerRef = useRef(null);
+
+  useEffect(() => {
+    return () => clearInterval(timerRef.current);
+  }, []);
+
+  useEffect(() => {
+    if (!targetText) return;
+
+    if (userInput === targetText) {
+      setFinished(true);
+      clearInterval(timerRef.current);
     }
-  }
+  }, [targetText, userInput]);
 
-  countSymbols = (userInput) => {
-    const text = this.state.text.replace(" ", "");
-    return userInput
-      .replace(" ", "")
-      .split("")
-      .filter((s, i) => s === text[i]).length;
+  const startTimer = () => {
+    if (timerRef.current) return;
+
+    setStarted(true);
+    timerRef.current = setInterval(() => {
+      setSeconds((prev) => prev + 1);
+    }, 1000);
   };
 
-  setTimer = () => {
-    if (!this.state.started) {
-      this.setState({ started: true });
-      this.interval = setInterval(() => {
-        this.setState((prevProps) => {
-          return { sec: prevProps.sec + 1 };
-        });
-      }, 1000);
-    }
+  const handleInputChange = (event) => {
+    if (!started) startTimer();
+    setUserInput(event.target.value);
   };
 
-  render() {
-    return (
-      <div className="container mb-5 mt-5">
-        <h3 className="text-center mb-4 text-success">
-          Typing speed Calculator
-        </h3>
-        <div className="row">
-          <div className="col-md-6 col-12 mx-auto">
-            <Preview text={this.state.text} userInput={this.state.userInput} />
-            <textarea
-              value={this.state.userInput}
-              onChange={this.onInputChange}
-              className="form-control mb-3"
-              placeholder="Start typing.."
-              readOnly={this.state.finished}
-            ></textarea>
-            <Speed symbols={this.state.symbols} sec={this.state.sec} />
-            <div className="text-right mx-auto">
-              <button
-                className="btn btn-outline-primary"
-                onClick={this.onRestart}
-              >
-                Restart
-              </button>
-            </div>
-          </div>
+  const handleRestart = () => {
+    clearInterval(timerRef.current);
+    timerRef.current = null;
+    setTargetText(getRandomText());
+    setUserInput('');
+    setSeconds(0);
+    setStarted(false);
+    setFinished(false);
+  };
+
+  const correctSymbols = useMemo(
+    () =>
+      userInput
+        .split('')
+        .filter((char, index) => char === targetText[index]).length,
+    [targetText, userInput]
+  );
+
+  return (
+    <div className="app">
+      <header className="app__header">
+        <h1>Typing Speed Calculator</h1>
+        <p>Type the prompt accurately to see your words per minute.</p>
+      </header>
+
+      <main className="app__card">
+        <Preview text={targetText} userInput={userInput} />
+
+        <label className="input__label" htmlFor="typing-area">
+          Start typing below:
+        </label>
+        <textarea
+          id="typing-area"
+          value={userInput}
+          onChange={handleInputChange}
+          placeholder="Start typing here..."
+          className="input__area"
+          disabled={finished}
+          spellCheck="false"
+        />
+
+        <Speed symbols={correctSymbols} seconds={seconds} finished={finished} />
+
+        <div className="app__actions">
+          <button type="button" onClick={handleRestart}>
+            Restart
+          </button>
         </div>
-      </div>
-    );
-  }
-}
+      </main>
+    </div>
+  );
+};
 
 export default App;
