@@ -1,0 +1,18 @@
+-- Seed texts for typing practice
+INSERT INTO texts (content, difficulty_level, word_count, character_count, is_active) VALUES
+('Well, and so we breakfasted at ten as usual; I thought it would never be over; for, by the bye, you are to understand, that my uncle and aunt were horrid unpleasant all the time I was with them. If you''ll believe me, I did not once put my foot out of doors, though I was there a fortnight. Not one party, or scheme, or anything. To be sure London was rather thin, but, however, the Little Theatre was open. Well, and so just as the carriage came to the door, my uncle was called away upon business to that horrid man Mr. Stone. And then, you know, when once they get together, there is no end of it. Well, I was so frightened I did not know what to do, for my uncle was to give me away; and if we were beyond the hour, we could not be married all day. But, luckily, he came back again in ten minutes'' time, and then we all set out. However, I recollected afterwards that if he had been prevented going, the wedding need not be put off, for Mr. Darcy might have done as well.', 'medium', 150, 850, true),
+('In the gallery there were many family portraits, but they could have little to fix the attention of a stranger. Elizabeth walked in quest of the only face whose features would be known to her. At last it arrested her--and she beheld a striking resemblance to Mr. Darcy, with such a smile over the face as she remembered to have sometimes seen when he looked at her. She stood several minutes before the picture, in earnest contemplation, and returned to it again before they quitted the gallery. Mrs. Reynolds informed them that it had been taken in his father''s lifetime.', 'easy', 100, 550, true),
+('She did at last extort from her father an acknowledgment that the horses were engaged. Jane was therefore obliged to go on horseback, and her mother attended her to the door with many cheerful prognostics of a bad day. Her hopes were answered; Jane had not been gone long before it rained hard. Her sisters were uneasy for her, but her mother was delighted. The rain continued the whole evening without intermission; Jane certainly could not come back.', 'easy', 80, 450, true),
+('I am no longer surprised at your knowing only six accomplished women. I rather wonder now at your knowing any.', 'easy', 20, 110, true),
+('All this she must possess," added Darcy, "and to all this she must yet add something more substantial, in the improvement of her mind by extensive reading.', 'medium', 30, 160, true),
+('The quick brown fox jumps over the lazy dog. This sentence contains every letter of the alphabet and is commonly used for typing practice. Typing speed is measured in words per minute, which calculates how many words you can type accurately in sixty seconds.', 'easy', 40, 240, true),
+('Programming is the art of telling a computer what to do through a series of instructions. These instructions are written in programming languages like JavaScript, Python, or Java. Each language has its own syntax and rules that developers must follow to create functional applications.', 'medium', 50, 300, true),
+('The internet has revolutionized the way we communicate, work, and access information. It connects billions of devices worldwide, enabling instant communication across vast distances. This global network has transformed industries, created new opportunities, and changed the fabric of modern society.', 'hard', 60, 380, true)
+ON CONFLICT DO NOTHING;
+
+-- Update word_count and character_count for existing texts
+UPDATE texts SET 
+    word_count = (SELECT array_length(string_to_array(content, ' '), 1)),
+    character_count = LENGTH(content)
+WHERE word_count IS NULL OR character_count IS NULL;
+

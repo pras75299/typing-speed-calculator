@@ -1,0 +1,33 @@
+{
+  "name": "typing-speed-backend",
+  "version": "1.0.0",
+  "description": "Backend server for Typing Speed Calculator",
+  "main": "src/server.js",
+  "scripts": {
+    "start": "node src/server.js",
+    "dev": "nodemon src/server.js",
+    "db:up": "docker-compose up -d postgres",
+    "db:down": "docker-compose down",
+    "db:setup": "bash scripts/setup-db.sh",
+    "db:migrate": "docker exec -i typing-speed-db psql -U postgres -d typing_speed < migrations/001_initial_schema.sql",
+    "db:seed": "docker exec -i typing-speed-db psql -U postgres -d typing_speed < seeds/texts.sql",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": ["typing", "speed", "websocket"],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "express": "^4.18.2",
+    "ws": "^8.14.2",
+    "pg": "^8.11.3",
+    "jsonwebtoken": "^9.0.2",
+    "bcryptjs": "^2.4.3",
+    "cors": "^2.8.5",
+    "dotenv": "^16.3.1",
+    "express-rate-limit": "^6.10.0"
+  },
+  "devDependencies": {
+    "nodemon": "^3.0.1"
+  }
+}
+
