@@ -1,0 +1,120 @@
+.leaderboard {
+  padding: 24px;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.leaderboard h2 {
+  margin: 0 0 24px;
+  color: #0f172a;
+  font-size: 28px;
+}
+
+.leaderboard-table {
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 2px 8px rgba(15, 23, 42, 0.04);
+}
+
+.leaderboard-header {
+  display: grid;
+  grid-template-columns: 80px 1fr 120px 120px 150px;
+  gap: 16px;
+  padding: 16px 20px;
+  background: #f8fafc;
+  border-bottom: 2px solid #e2e8f0;
+  font-weight: 600;
+  color: #475569;
+  font-size: 14px;
+}
+
+.leaderboard-row {
+  display: grid;
+  grid-template-columns: 80px 1fr 120px 120px 150px;
+  gap: 16px;
+  padding: 16px 20px;
+  border-bottom: 1px solid #e2e8f0;
+  transition: background 0.2s;
+}
+
+.leaderboard-row:hover {
+  background: #f8fafc;
+}
+
+.leaderboard-row:last-child {
+  border-bottom: none;
+}
+
+.rank-col {
+  display: flex;
+  align-items: center;
+}
+
+.rank-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  font-weight: 700;
+  font-size: 14px;
+}
+
+.rank-badge--top {
+  background: #0ea5e9;
+  color: #ffffff;
+}
+
+.rank-badge--normal {
+  background: #e2e8f0;
+  color: #475569;
+}
+
+.username-col {
+  font-weight: 500;
+  color: #0f172a;
+}
+
+.wpm-col {
+  color: #0ea5e9;
+  font-size: 16px;
+}
+
+.accuracy-col {
+  color: #64748b;
+}
+
+.date-col {
+  color: #64748b;
+  font-size: 14px;
+}
+
+.leaderboard-loading,
+.leaderboard-error,
+.leaderboard-empty {
+  text-align: center;
+  padding: 40px;
+  color: #64748b;
+}
+
+.leaderboard-error {
+  color: #dc2626;
+}
+
+@media (max-width: 768px) {
+  .leaderboard-header,
+  .leaderboard-row {
+    grid-template-columns: 60px 1fr 100px 100px;
+    gap: 8px;
+    padding: 12px;
+    font-size: 14px;
+  }
+
+  .date-col {
+    display: none;
+  }
+}
+
