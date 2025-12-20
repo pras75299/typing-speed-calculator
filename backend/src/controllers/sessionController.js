@@ -9,10 +9,19 @@ async function createSession(req, res, next) {
       return res.status(400).json({ error: 'Text ID is required' });
     }
 
-    // Verify text exists
-    const textCheck = await pool.query('SELECT id FROM texts WHERE id = $1 AND is_active = true', [textId]);
+    // Verify text exists and is within character limits (100-400 chars for testing)
+    const textCheck = await pool.query(
+      `SELECT id FROM texts 
+       WHERE id = $1 
+         AND is_active = true 
+         AND character_count >= 100 
+         AND character_count <= 400`,
+      [textId]
+    );
     if (textCheck.rows.length === 0) {
-      return res.status(404).json({ error: 'Text not found' });
+      return res.status(404).json({ 
+        error: 'Text not found or exceeds character limit (100-400 characters for testing)' 
+      });
     }
 
     const result = await pool.query(

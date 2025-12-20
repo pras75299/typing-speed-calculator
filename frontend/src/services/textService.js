@@ -1,8 +1,10 @@
 import api from './api';
 
 export const textService = {
-  async getRandomText() {
-    const response = await api.get('/texts/random');
+  async getRandomText(language = 'javascript') {
+    const response = await api.get('/texts/random', {
+      params: { language }
+    });
     return response.data.text;
   },
 

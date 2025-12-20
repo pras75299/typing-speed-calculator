@@ -1,4 +1,5 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
+import { useLocation } from 'react-router-dom';
 import { statsService } from '../../services/statsService';
 import './Dashboard.css';
 
@@ -7,14 +8,12 @@ const Dashboard = () => {
   const [detailedStats, setDetailedStats] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  const location = useLocation();
 
-  useEffect(() => {
-    loadStats();
-  }, []);
-
-  const loadStats = async () => {
+  const loadStats = useCallback(async () => {
     try {
       setLoading(true);
+      setError('');
       const [basicStats, detailed] = await Promise.all([
         statsService.getUserStats(),
         statsService.getDetailedStats(),
@@ -26,7 +25,22 @@ const Dashboard = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, []);
+
+  // Load stats on mount and when navigating to dashboard
+  useEffect(() => {
+    loadStats();
+  }, [loadStats, location.pathname]);
+
+  // Refresh stats when window gains focus (user might have completed a session in another tab)
+  useEffect(() => {
+    const handleFocus = () => {
+      loadStats();
+    };
+
+    window.addEventListener('focus', handleFocus);
+    return () => window.removeEventListener('focus', handleFocus);
+  }, [loadStats]);
 
   if (loading) {
     return <div className="dashboard-loading">Loading statistics...</div>;
@@ -38,7 +52,12 @@ const Dashboard = () => {
 
   return (
     <div className="dashboard">
-      <h2>Your Statistics</h2>
+      <div className="dashboard-header">
+        <h2>Your Statistics</h2>
+        <button onClick={loadStats} className="refresh-button" disabled={loading}>
+          {loading ? 'Refreshing...' : '🔄 Refresh'}
+        </button>
+      </div>
       <div className="stats-grid">
         <div className="stat-card">
           <div className="stat-label">Total Sessions</div>

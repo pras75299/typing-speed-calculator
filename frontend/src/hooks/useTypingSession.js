@@ -3,7 +3,7 @@ import { sessionService } from '../services/sessionService';
 import { textService } from '../services/textService';
 import websocketService from '../services/websocket';
 
-export const useTypingSession = () => {
+export const useTypingSession = (language = 'javascript') => {
   const [targetText, setTargetText] = useState(null);
   const [textId, setTextId] = useState(null);
   const [userInput, setUserInput] = useState('');
@@ -14,21 +14,26 @@ export const useTypingSession = () => {
   const [wpm, setWpm] = useState(0);
   const [accuracy, setAccuracy] = useState(0);
   const [correctChars, setCorrectChars] = useState(0);
+  const [currentLanguage, setCurrentLanguage] = useState(language);
 
   const timerRef = useRef(null);
   const lastUpdateRef = useRef(0);
+  const finishedRef = useRef(false);
   const THROTTLE_MS = 100;
 
-  // Initialize session with random text
-  const initializeSession = useCallback(async () => {
+  // Initialize session with random code snippet
+  const initializeSession = useCallback(async (lang) => {
+    const languageToUse = lang || currentLanguage;
     try {
-      const text = await textService.getRandomText();
+      const text = await textService.getRandomText(languageToUse);
       setTargetText(text.content);
       setTextId(text.id);
+      setCurrentLanguage(languageToUse);
       setUserInput('');
       setSeconds(0);
       setStarted(false);
       setFinished(false);
+      finishedRef.current = false;
       setSessionId(null);
       setWpm(0);
       setAccuracy(0);
@@ -38,9 +43,9 @@ export const useTypingSession = () => {
         timerRef.current = null;
       }
     } catch (error) {
-      console.error('Failed to load text:', error);
+      console.error('Failed to load code snippet:', error);
     }
-  }, []);
+  }, [currentLanguage]);
 
   // Start typing session
   const startSession = useCallback(async () => {
@@ -79,36 +84,18 @@ export const useTypingSession = () => {
       lastUpdateRef.current = now;
       setUserInput(value);
 
-      // Start timer on first keystroke
-      if (!started && value.length > 0) {
-        setStarted(true);
-        startSession();
-        timerRef.current = setInterval(() => {
-          setSeconds((prev) => prev + 1);
-        }, 1000);
-      }
-
-      // Send typing input via WebSocket
-      if (sessionId && websocketService.isConnected() && started) {
-        websocketService.send({
-          type: 'typing:input',
-          data: {
-            sessionId: sessionId,
-            input: value,
-            position: value.length,
-          },
-        });
-      }
-
-      // Check for completion
-      if (targetText && value === targetText) {
-        setFinished(true);
+      // Check for completion first - timer stops when text is completely typed
+      if (targetText && value === targetText && !finishedRef.current) {
+        // Stop the timer immediately
         if (timerRef.current) {
           clearInterval(timerRef.current);
           timerRef.current = null;
         }
+        setFinished(true);
+        finishedRef.current = true;
+        setStarted(false); // Prevent timer from restarting
 
-        // Send completion via WebSocket
+        // Send completion via WebSocket (this will update statistics in database)
         if (sessionId && websocketService.isConnected()) {
           websocketService.send({
             type: 'typing:complete',
@@ -118,9 +105,40 @@ export const useTypingSession = () => {
             },
           });
         }
+        return; // Exit early to prevent further processing
+      }
+
+      // Start timer on first keystroke (only if not finished)
+      if (!started && !finishedRef.current && value.length > 0) {
+        setStarted(true);
+        startSession();
+        timerRef.current = setInterval(() => {
+          // Don't increment if finished
+          if (!finishedRef.current) {
+            setSeconds((prev) => prev + 1);
+          } else {
+            // Stop timer if finished
+            if (timerRef.current) {
+              clearInterval(timerRef.current);
+              timerRef.current = null;
+            }
+          }
+        }, 1000);
+      }
+
+      // Send typing input via WebSocket (only if not finished)
+      if (sessionId && websocketService.isConnected() && started && !finishedRef.current) {
+        websocketService.send({
+          type: 'typing:input',
+          data: {
+            sessionId: sessionId,
+            input: value,
+            position: value.length,
+          },
+        });
       }
     },
-    [targetText, started, sessionId, startSession]
+    [targetText, started, sessionId, startSession, finished]
   );
 
   // Restart session
@@ -142,15 +160,22 @@ export const useTypingSession = () => {
     };
 
     const handleCompleted = (data) => {
-      setFinished(true);
-      setWpm(data.wpm || 0);
-      setAccuracy(data.accuracy || 0);
-      setCorrectChars(data.correctCharacters || 0);
-      setSeconds(data.duration || 0);
+      // Ensure timer is stopped when session is completed
       if (timerRef.current) {
         clearInterval(timerRef.current);
         timerRef.current = null;
       }
+      
+      setFinished(true);
+      finishedRef.current = true;
+      setWpm(data.wpm || 0);
+      setAccuracy(data.accuracy || 0);
+      setCorrectChars(data.correctCharacters || 0);
+      setSeconds(data.duration || 0);
+      
+      // Statistics have been updated in the database at this point
+      // Dashboard will refresh when user navigates to it
+      console.log('Session completed! Statistics updated in database.');
     };
 
     websocketService.on('progress:update', handleProgress);
@@ -162,9 +187,19 @@ export const useTypingSession = () => {
     };
   }, []);
 
-  // Initialize on mount
+  // Initialize on mount or when language changes
   useEffect(() => {
-    initializeSession();
+    initializeSession(currentLanguage);
+  }, [currentLanguage, initializeSession]);
+
+  // Function to change language
+  const changeLanguage = useCallback((newLanguage) => {
+    setCurrentLanguage(newLanguage);
+    if (timerRef.current) {
+      clearInterval(timerRef.current);
+      timerRef.current = null;
+    }
+    initializeSession(newLanguage);
   }, [initializeSession]);
 
   // Cleanup on unmount
@@ -187,6 +222,8 @@ export const useTypingSession = () => {
     correctChars,
     handleInputChange,
     restart,
+    currentLanguage,
+    changeLanguage,
   };
 };
 

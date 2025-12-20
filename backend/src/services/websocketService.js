@@ -62,9 +62,14 @@ async function handleSessionStart(ws, data) {
     return;
   }
 
-  // Get text content
+  // Get text content (ensure it's within reasonable limits for testing)
   const textResult = await pool.query(
-    'SELECT id, content, character_count FROM texts WHERE id = $1 AND is_active = true',
+    `SELECT id, content, character_count 
+     FROM texts 
+     WHERE id = $1 
+       AND is_active = true 
+       AND character_count <= 400 
+       AND character_count >= 100`,
     [textId]
   );
 

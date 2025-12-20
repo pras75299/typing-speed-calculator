@@ -1,4 +1,5 @@
 import React from 'react';
+import { Link } from 'react-router-dom';
 import { useTypingSession } from '../../hooks/useTypingSession';
 import Preview from '../Preview';
 import Speed from '../Speed';
@@ -16,31 +17,61 @@ const TypingArea = () => {
     correctChars,
     handleInputChange,
     restart,
+    currentLanguage,
+    changeLanguage,
   } = useTypingSession();
 
+  const languages = [
+    { value: 'javascript', label: 'JavaScript' },
+    { value: 'python', label: 'Python' },
+    { value: 'java', label: 'Java' },
+    { value: 'typescript', label: 'TypeScript' },
+    { value: 'cpp', label: 'C++' },
+    { value: 'go', label: 'Go' },
+  ];
+
   if (!targetText) {
-    return <div className="typing-loading">Loading text...</div>;
+    return <div className="typing-loading">Loading code snippet...</div>;
   }
 
   return (
     <div className="typing-area">
       <header className="typing-area__header">
-        <h1>Typing Speed Calculator</h1>
-        <p>Type the prompt accurately to see your words per minute.</p>
+        <h1>Code Typing Practice</h1>
+        <p>Practice typing code to improve your coding speed and accuracy.</p>
       </header>
 
       <main className="typing-area__card">
+        <div className="language-selector">
+          <label htmlFor="language-select" className="language-selector__label">
+            Programming Language:
+          </label>
+          <select
+            id="language-select"
+            value={currentLanguage}
+            onChange={(e) => changeLanguage(e.target.value)}
+            className="language-selector__select"
+            disabled={started && !finished}
+          >
+            {languages.map((lang) => (
+              <option key={lang.value} value={lang.value}>
+                {lang.label}
+              </option>
+            ))}
+          </select>
+        </div>
+
         <Preview text={targetText} userInput={userInput} />
 
         <label className="input__label" htmlFor="typing-area-input">
-          Start typing below:
+          Type the code below:
         </label>
         <textarea
           id="typing-area-input"
           value={userInput}
           onChange={(e) => handleInputChange(e.target.value)}
-          placeholder="Start typing here..."
-          className="input__area"
+          placeholder="Start typing the code here..."
+          className="input__area code-input"
           disabled={finished}
           spellCheck="false"
           autoFocus
@@ -57,10 +88,13 @@ const TypingArea = () => {
         {finished && (
           <div className="typing-complete">
             <p className="typing-complete__message">
-              🎉 Great job! You completed the text!
+              🎉 Great job! You completed the code snippet!
             </p>
             <p className="typing-complete__stats">
               Final Score: {wpm.toFixed(1)} WPM • {accuracy.toFixed(1)}% Accuracy
+            </p>
+            <p className="typing-complete__link">
+              <Link to="/dashboard">View your updated statistics →</Link>
             </p>
           </div>
         )}

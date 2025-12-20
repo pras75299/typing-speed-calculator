@@ -1,13 +1,47 @@
--- Seed texts for typing practice
-INSERT INTO texts (content, difficulty_level, word_count, character_count, is_active) VALUES
-('Well, and so we breakfasted at ten as usual; I thought it would never be over; for, by the bye, you are to understand, that my uncle and aunt were horrid unpleasant all the time I was with them. If you''ll believe me, I did not once put my foot out of doors, though I was there a fortnight. Not one party, or scheme, or anything. To be sure London was rather thin, but, however, the Little Theatre was open. Well, and so just as the carriage came to the door, my uncle was called away upon business to that horrid man Mr. Stone. And then, you know, when once they get together, there is no end of it. Well, I was so frightened I did not know what to do, for my uncle was to give me away; and if we were beyond the hour, we could not be married all day. But, luckily, he came back again in ten minutes'' time, and then we all set out. However, I recollected afterwards that if he had been prevented going, the wedding need not be put off, for Mr. Darcy might have done as well.', 'medium', 150, 850, true),
-('In the gallery there were many family portraits, but they could have little to fix the attention of a stranger. Elizabeth walked in quest of the only face whose features would be known to her. At last it arrested her--and she beheld a striking resemblance to Mr. Darcy, with such a smile over the face as she remembered to have sometimes seen when he looked at her. She stood several minutes before the picture, in earnest contemplation, and returned to it again before they quitted the gallery. Mrs. Reynolds informed them that it had been taken in his father''s lifetime.', 'easy', 100, 550, true),
-('She did at last extort from her father an acknowledgment that the horses were engaged. Jane was therefore obliged to go on horseback, and her mother attended her to the door with many cheerful prognostics of a bad day. Her hopes were answered; Jane had not been gone long before it rained hard. Her sisters were uneasy for her, but her mother was delighted. The rain continued the whole evening without intermission; Jane certainly could not come back.', 'easy', 80, 450, true),
-('I am no longer surprised at your knowing only six accomplished women. I rather wonder now at your knowing any.', 'easy', 20, 110, true),
-('All this she must possess," added Darcy, "and to all this she must yet add something more substantial, in the improvement of her mind by extensive reading.', 'medium', 30, 160, true),
-('The quick brown fox jumps over the lazy dog. This sentence contains every letter of the alphabet and is commonly used for typing practice. Typing speed is measured in words per minute, which calculates how many words you can type accurately in sixty seconds.', 'easy', 40, 240, true),
-('Programming is the art of telling a computer what to do through a series of instructions. These instructions are written in programming languages like JavaScript, Python, or Java. Each language has its own syntax and rules that developers must follow to create functional applications.', 'medium', 50, 300, true),
-('The internet has revolutionized the way we communicate, work, and access information. It connects billions of devices worldwide, enabling instant communication across vast distances. This global network has transformed industries, created new opportunities, and changed the fabric of modern society.', 'hard', 60, 380, true)
+-- Seed code snippets for typing practice in different programming languages
+-- Character counts optimized for testing: 100-400 characters
+
+-- JavaScript Code Snippets (Default)
+INSERT INTO texts (content, difficulty_level, word_count, character_count, language, is_active) VALUES
+-- Easy JavaScript (100-200 characters)
+('function greet(name) {\n  return `Hello, ${name}!`;\n}\n\nconst message = greet("World");\nconsole.log(message);', 'easy', 15, 110, 'javascript', true),
+('const numbers = [1, 2, 3, 4, 5];\nconst doubled = numbers.map(n => n * 2);\nconsole.log(doubled);', 'easy', 15, 120, 'javascript', true),
+('function add(a, b) {\n  return a + b;\n}\n\nconst result = add(5, 3);\nconsole.log(result);', 'easy', 15, 115, 'javascript', true),
+('const user = {\n  name: "John",\n  age: 30,\n  city: "New York"\n};\nconsole.log(user.name);', 'easy', 15, 130, 'javascript', true),
+('for (let i = 0; i < 5; i++) {\n  console.log(`Count: ${i}`);\n}', 'easy', 12, 75, 'javascript', true),
+
+-- Medium JavaScript (150-300 characters)
+('function calculateTotal(items) {\n  return items.reduce((sum, item) => {\n    return sum + item.price * item.quantity;\n  }, 0);\n}\n\nconst cart = [\n  { price: 10, quantity: 2 },\n  { price: 5, quantity: 3 }\n];\nconsole.log(calculateTotal(cart));', 'medium', 30, 280, 'javascript', true),
+('async function fetchUserData(userId) {\n  try {\n    const response = await fetch(`/api/users/${userId}`);\n    const data = await response.json();\n    return data;\n  } catch (error) {\n    console.error("Error:", error);\n    return null;\n  }\n}', 'medium', 28, 260, 'javascript', true),
+('class Calculator {\n  constructor() {\n    this.result = 0;\n  }\n  \n  add(value) {\n    this.result += value;\n    return this;\n  }\n  \n  multiply(value) {\n    this.result *= value;\n    return this;\n  }\n}', 'medium', 25, 240, 'javascript', true),
+('const users = users.filter(user => user.active)\n  .map(user => ({\n    id: user.id,\n    name: user.name.toUpperCase(),\n    email: user.email\n  }))\n  .sort((a, b) => a.name.localeCompare(b.name));', 'medium', 30, 270, 'javascript', true),
+
+-- Hard JavaScript (200-400 characters)
+('function debounce(func, wait) {\n  let timeout;\n  return function executedFunction(...args) {\n    const later = () => {\n      clearTimeout(timeout);\n      func(...args);\n    };\n    clearTimeout(timeout);\n    timeout = setTimeout(later, wait);\n  };\n}\n\nconst handleSearch = debounce((query) => {\n  console.log("Searching for:", query);\n}, 300);', 'hard', 40, 380, 'javascript', true),
+('class EventEmitter {\n  constructor() {\n    this.events = {};\n  }\n  \n  on(event, callback) {\n    if (!this.events[event]) {\n      this.events[event] = [];\n    }\n    this.events[event].push(callback);\n  }\n  \n  emit(event, data) {\n    if (this.events[event]) {\n      this.events[event].forEach(callback => callback(data));\n    }\n  }\n}', 'hard', 45, 390, 'javascript', true),
+
+-- Python Code Snippets
+('def greet(name):\n    return f"Hello, {name}!"\n\nmessage = greet("World")\nprint(message)', 'easy', 12, 110, 'python', true),
+('numbers = [1, 2, 3, 4, 5]\ndoubled = [n * 2 for n in numbers]\nprint(doubled)', 'easy', 12, 95, 'python', true),
+('def add(a, b):\n    return a + b\n\nresult = add(5, 3)\nprint(result)', 'easy', 12, 85, 'python', true),
+('class Calculator:\n    def __init__(self):\n        self.result = 0\n    \n    def add(self, value):\n        self.result += value\n        return self', 'medium', 20, 180, 'python', true),
+('def calculate_total(items):\n    return sum(item["price"] * item["quantity"] \n               for item in items)\n\ncart = [{"price": 10, "quantity": 2},\n        {"price": 5, "quantity": 3}]\nprint(calculate_total(cart))', 'medium', 28, 260, 'python', true),
+('async def fetch_user_data(user_id):\n    try:\n        async with aiohttp.ClientSession() as session:\n            async with session.get(f"/api/users/{user_id}") as response:\n                return await response.json()\n    except Exception as e:\n        print(f"Error: {e}")\n        return None', 'hard', 35, 320, 'python', true),
+
+-- Java Code Snippets
+('public class Greeter {\n    public String greet(String name) {\n        return "Hello, " + name + "!";\n    }\n}', 'easy', 15, 120, 'java', true),
+('public class Calculator {\n    private int result = 0;\n    \n    public Calculator add(int value) {\n        this.result += value;\n        return this;\n    }\n}', 'medium', 20, 180, 'java', true),
+('public class UserService {\n    public List<User> getActiveUsers(List<User> users) {\n        return users.stream()\n            .filter(User::isActive)\n            .map(u -> new User(u.getId(), u.getName().toUpperCase()))\n            .collect(Collectors.toList());\n    }\n}', 'hard', 35, 340, 'java', true),
+
+-- TypeScript Code Snippets
+('interface User {\n  id: number;\n  name: string;\n  email: string;\n}\n\nfunction greet(user: User): string {\n  return `Hello, ${user.name}!`;\n}', 'easy', 18, 150, 'typescript', true),
+('type Callback<T> = (data: T) => void;\n\nclass EventEmitter<T> {\n  private events: Map<string, Callback<T>[]> = new Map();\n  \n  on(event: string, callback: Callback<T>): void {\n    if (!this.events.has(event)) {\n      this.events.set(event, []);\n    }\n    this.events.get(event)!.push(callback);\n  }\n}', 'hard', 40, 380, 'typescript', true),
+
+-- C++ Code Snippets
+('#include <iostream>\n#include <vector>\n\nint main() {\n    std::vector<int> numbers = {1, 2, 3, 4, 5};\n    for (int n : numbers) {\n        std::cout << n * 2 << std::endl;\n    }\n    return 0;\n}', 'medium', 25, 240, 'cpp', true),
+
+-- Go Code Snippets
+('package main\n\nimport "fmt"\n\nfunc greet(name string) string {\n    return fmt.Sprintf("Hello, %s!", name)\n}\n\nfunc main() {\n    message := greet("World")\n    fmt.Println(message)\n}', 'medium', 22, 220, 'go', true)
 ON CONFLICT DO NOTHING;
 
 -- Update word_count and character_count for existing texts
@@ -15,4 +49,3 @@ UPDATE texts SET
     word_count = (SELECT array_length(string_to_array(content, ' '), 1)),
     character_count = LENGTH(content)
 WHERE word_count IS NULL OR character_count IS NULL;
-

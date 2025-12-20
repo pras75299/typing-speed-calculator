@@ -78,8 +78,12 @@ docker logs typing-speed-db
 - `GET /api/auth/me` - Get current user (requires auth)
 
 ### Texts
-- `GET /api/texts/random` - Get random text
+- `GET /api/texts/random?maxChars=400&minChars=100` - Get random text within character limits
+  - `maxChars` (optional): Maximum characters (default: 400)
+  - `minChars` (optional): Minimum characters (default: 100)
 - `GET /api/texts/:id` - Get text by ID
+
+**Note:** All texts used for typing tests are limited to 100-400 characters for reasonable testing duration.
 
 ### Sessions
 - `POST /api/sessions` - Create new session (requires auth)

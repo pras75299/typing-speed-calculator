@@ -58,9 +58,26 @@
 }
 
 .typing-complete__stats {
-  margin: 0;
+  margin: 0 0 12px;
   font-size: 16px;
   color: #15803d;
+}
+
+.typing-complete__link {
+  margin: 0;
+  font-size: 14px;
+}
+
+.typing-complete__link a {
+  color: #0ea5e9;
+  text-decoration: none;
+  font-weight: 600;
+  transition: color 0.2s;
+}
+
+.typing-complete__link a:hover {
+  color: #0284c7;
+  text-decoration: underline;
 }
 
 .restart-button {
@@ -81,5 +98,51 @@
 
 .restart-button:active {
   transform: translateY(1px);
+}
+
+.language-selector {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 8px;
+}
+
+.language-selector__label {
+  font-size: 14px;
+  font-weight: 600;
+  color: #475569;
+}
+
+.language-selector__select {
+  padding: 8px 12px;
+  border: 1px solid #e2e8f0;
+  border-radius: 6px;
+  font-size: 14px;
+  background: #ffffff;
+  color: #0f172a;
+  cursor: pointer;
+  transition: border-color 0.2s, box-shadow 0.2s;
+  min-width: 150px;
+}
+
+.language-selector__select:hover:not(:disabled) {
+  border-color: #0ea5e9;
+}
+
+.language-selector__select:focus {
+  outline: none;
+  border-color: #0ea5e9;
+  box-shadow: 0 0 0 3px rgba(14, 165, 233, 0.1);
+}
+
+.language-selector__select:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.code-input {
+  font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', 'Consolas', 'source-code-pro', monospace;
+  font-size: 14px;
+  line-height: 1.6;
 }
 

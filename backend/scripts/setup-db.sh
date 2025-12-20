@@ -42,10 +42,22 @@ echo "📝 Running database migrations..."
 docker exec -i typing-speed-db psql -U postgres -d typing_speed < "$BACKEND_DIR/migrations/001_initial_schema.sql"
 
 if [ $? -eq 0 ]; then
-    echo "✅ Migrations completed successfully"
+    echo "✅ Initial schema migration completed"
 else
-    echo "❌ Migration failed"
+    echo "❌ Initial schema migration failed"
     exit 1
+fi
+
+# Run language column migration
+if [ -f "$BACKEND_DIR/migrations/002_add_language_column.sql" ]; then
+    echo "📝 Running language column migration..."
+    docker exec -i typing-speed-db psql -U postgres -d typing_speed < "$BACKEND_DIR/migrations/002_add_language_column.sql"
+    
+    if [ $? -eq 0 ]; then
+        echo "✅ Language column migration completed"
+    else
+        echo "⚠️  Language column migration failed (might already exist)"
+    fi
 fi
 
 # Seed data

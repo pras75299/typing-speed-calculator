@@ -14,10 +14,13 @@
   padding: 16px;
   min-height: 96px;
   line-height: 1.6;
-  font-size: 16px;
+  font-size: 14px;
+  font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', 'Consolas', 'source-code-pro', monospace;
   background: #f8fafc;
   color: #0f172a;
   box-sizing: border-box;
+  white-space: pre-wrap;
+  word-wrap: break-word;
 }
 
 .preview__char {
