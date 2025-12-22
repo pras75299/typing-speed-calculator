@@ -9,7 +9,20 @@
   max-width: 720px;
   margin: 0 auto 24px;
 }
+.preview__cursor {
+  display: inline-block;
+  width: 0; /* ✅ takes no space */
+  border-left: 2px solid #4fc3f7; /* your cursor color */
+  height: 1.2em;
+  vertical-align: -0.1em;
+  animation: blink 1s step-end infinite;
+}
 
+@keyframes blink {
+  50% {
+    opacity: 0;
+  }
+}
 .typing-area__header h1 {
   margin: 0;
   font-size: 28px;
@@ -141,8 +154,8 @@
 }
 
 .code-input {
-  font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', 'Consolas', 'source-code-pro', monospace;
+  font-family: "Monaco", "Menlo", "Ubuntu Mono", "Consolas", "source-code-pro",
+    monospace;
   font-size: 14px;
   line-height: 1.6;
 }
-

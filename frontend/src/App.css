@@ -8,6 +8,62 @@
   flex: 1;
 }
 
+.preview-wrapper {
+  position: relative;
+  border-radius: 10px;
+  overflow: hidden;
+  border: 1px solid #e2e8f0;
+}
+
+.preview-syntax-highlight {
+  position: relative;
+  z-index: 0;
+  overflow: auto;
+}
+
+.preview-syntax-highlight pre {
+  white-space: pre-wrap !important;
+  word-wrap: break-word !important;
+  overflow-wrap: break-word !important;
+}
+
+.preview-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  pointer-events: none;
+  z-index: 1;
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  overflow: hidden;
+}
+
+.preview__char {
+  padding: 0;
+  background: transparent;
+  color: transparent;
+  display: inline;
+}
+
+.preview__char.correct {
+  background: rgba(223, 255, 160, 0.4);
+  color: transparent;
+  border-radius: 2px;
+}
+
+.preview__char.incorrect {
+  background: rgba(255, 107, 107, 0.4);
+  color: transparent;
+  border-radius: 2px;
+  text-decoration: underline;
+  text-decoration-color: #ff6b6b;
+  text-decoration-thickness: 2px;
+}
+
+/* Legacy preview class for backward compatibility */
 .preview {
   border: 1px solid #e2e8f0;
   border-radius: 10px;
@@ -21,18 +77,6 @@
   box-sizing: border-box;
   white-space: pre-wrap;
   word-wrap: break-word;
-}
-
-.preview__char {
-  padding: 1px 1px;
-}
-
-.preview__char.correct {
-  background: #dfffa0;
-}
-
-.preview__char.incorrect {
-  background: #ffd7d7;
 }
 
 .preview__cursor {
@@ -74,17 +118,34 @@
   padding: 12px;
   border: 1px solid #cbd5e1;
   border-radius: 10px;
-  font-size: 16px;
-  line-height: 1.5;
+  font-size: 14px;
+  line-height: 1.6;
   resize: vertical;
-  font-family: 'Courier New', Courier, monospace;
+  font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', 'Consolas', 'source-code-pro', monospace;
   box-sizing: border-box;
+  background: #1e1e1e;
+  color: #d4d4d4;
+  tab-size: 2;
+}
+
+.input__area.code-input {
+  background: #1e1e1e;
+  color: #d4d4d4;
+  border-color: #3e3e3e;
+  white-space: pre-wrap;
+  word-wrap: break-word;
+  overflow-wrap: break-word;
 }
 
 .input__area:focus {
   outline: none;
-  border-color: #2563eb;
-  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.2);
+  border-color: #0ea5e9;
+  box-shadow: 0 0 0 3px rgba(14, 165, 233, 0.2);
+}
+
+.input__area.code-input:focus {
+  border-color: #0ea5e9;
+  box-shadow: 0 0 0 3px rgba(14, 165, 233, 0.3);
 }
 
 .input__area:disabled {

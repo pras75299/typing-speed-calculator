@@ -24,14 +24,19 @@ async function getRandomText(req, res, next) {
 
     let result;
     if (hasLanguageColumn) {
-      // Query with language filter
+      // Query with language filter - only return code snippets (exclude old text entries)
+      // Code snippets typically contain programming keywords or structure
       result = await pool.query(
         `SELECT id, content, difficulty_level, word_count, character_count, language 
          FROM texts 
          WHERE is_active = true 
            AND language = $1
            AND character_count >= $2 
-           AND character_count <= $3 
+           AND character_count <= $3
+           AND (content LIKE '%function%' OR content LIKE '%def %' OR content LIKE '%class %' 
+                OR content LIKE '%const %' OR content LIKE '%let %' OR content LIKE '%var %'
+                OR content LIKE '%public %' OR content LIKE '%package %' OR content LIKE '%import %'
+                OR content LIKE '%#include%' OR content LIKE '%#include<%')
          ORDER BY RANDOM() 
          LIMIT 1`,
         [language, minChars, maxChars]
@@ -39,6 +44,24 @@ async function getRandomText(req, res, next) {
 
       if (result.rows.length === 0) {
         // Fallback: try without character limits if no text found
+        result = await pool.query(
+          `SELECT id, content, difficulty_level, word_count, character_count, language 
+           FROM texts 
+           WHERE is_active = true 
+             AND language = $1 
+             AND character_count <= $2
+             AND (content LIKE '%function%' OR content LIKE '%def %' OR content LIKE '%class %' 
+                  OR content LIKE '%const %' OR content LIKE '%let %' OR content LIKE '%var %'
+                  OR content LIKE '%public %' OR content LIKE '%package %' OR content LIKE '%import %'
+                  OR content LIKE '%#include%' OR content LIKE '%#include<%')
+           ORDER BY RANDOM() 
+           LIMIT 1`,
+          [language, maxChars]
+        );
+      }
+      
+      // If still no results, try without code pattern filter (for edge cases)
+      if (result.rows.length === 0) {
         result = await pool.query(
           `SELECT id, content, difficulty_level, word_count, character_count, language 
            FROM texts 

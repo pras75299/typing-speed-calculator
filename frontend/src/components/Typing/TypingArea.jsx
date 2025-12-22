@@ -9,6 +9,7 @@ const TypingArea = () => {
   const {
     targetText,
     userInput,
+    cursorPosition,
     seconds,
     started,
     finished,
@@ -20,6 +21,51 @@ const TypingArea = () => {
     currentLanguage,
     changeLanguage,
   } = useTypingSession();
+
+  const handleTextareaChange = (e) => {
+    const textarea = e.target;
+    const value = textarea.value;
+    // Get cursor position synchronously - selectionStart is available immediately
+    const cursorPos = textarea.selectionStart;
+    handleInputChange(value, cursorPos);
+  };
+
+  const handleTextareaKeyUp = (e) => {
+    // Update cursor position after key is released (for arrow keys, home, end, etc.)
+    const textarea = e.target;
+    const cursorPos = textarea.selectionStart;
+    // Only update if cursor position changed (don't trigger full handleInputChange)
+    if (cursorPos !== cursorPosition) {
+      handleInputChange(textarea.value, cursorPos);
+    }
+  };
+
+  const handleTextareaKeyDown = (e) => {
+    // For arrow keys and navigation, update cursor position
+    if (['ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown', 'Home', 'End'].includes(e.key)) {
+      setTimeout(() => {
+        const textarea = e.target;
+        const cursorPos = textarea.selectionStart;
+        if (cursorPos !== cursorPosition) {
+          handleInputChange(textarea.value, cursorPos);
+        }
+      }, 0);
+    }
+  };
+
+  const handleTextareaClick = (e) => {
+    // Update cursor position on click
+    const textarea = e.target;
+    const cursorPos = textarea.selectionStart;
+    handleInputChange(textarea.value, cursorPos);
+  };
+
+  const handleTextareaSelect = (e) => {
+    // Update cursor position on text selection
+    const textarea = e.target;
+    const cursorPos = textarea.selectionStart;
+    handleInputChange(textarea.value, cursorPos);
+  };
 
   const languages = [
     { value: 'javascript', label: 'JavaScript' },
@@ -61,7 +107,7 @@ const TypingArea = () => {
           </select>
         </div>
 
-        <Preview text={targetText} userInput={userInput} />
+        <Preview text={targetText} userInput={userInput} cursorPosition={cursorPosition} language={currentLanguage} />
 
         <label className="input__label" htmlFor="typing-area-input">
           Type the code below:
@@ -69,7 +115,11 @@ const TypingArea = () => {
         <textarea
           id="typing-area-input"
           value={userInput}
-          onChange={(e) => handleInputChange(e.target.value)}
+          onChange={handleTextareaChange}
+          onKeyDown={handleTextareaKeyDown}
+          onKeyUp={handleTextareaKeyUp}
+          onClick={handleTextareaClick}
+          onSelect={handleTextareaSelect}
           placeholder="Start typing the code here..."
           className="input__area code-input"
           disabled={finished}

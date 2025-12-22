@@ -7,6 +7,7 @@ export const useTypingSession = (language = 'javascript') => {
   const [targetText, setTargetText] = useState(null);
   const [textId, setTextId] = useState(null);
   const [userInput, setUserInput] = useState('');
+  const [cursorPosition, setCursorPosition] = useState(0);
   const [seconds, setSeconds] = useState(0);
   const [started, setStarted] = useState(false);
   const [finished, setFinished] = useState(false);
@@ -26,10 +27,13 @@ export const useTypingSession = (language = 'javascript') => {
     const languageToUse = lang || currentLanguage;
     try {
       const text = await textService.getRandomText(languageToUse);
-      setTargetText(text.content);
+      // Normalize text - convert \n to actual newlines
+      const normalizedContent = text.content.replace(/\\n/g, '\n');
+      setTargetText(normalizedContent);
       setTextId(text.id);
       setCurrentLanguage(languageToUse);
       setUserInput('');
+      setCursorPosition(0);
       setSeconds(0);
       setStarted(false);
       setFinished(false);
@@ -72,17 +76,19 @@ export const useTypingSession = (language = 'javascript') => {
 
   // Handle input change
   const handleInputChange = useCallback(
-    (value) => {
+    (value, cursorPos = value.length) => {
       const now = Date.now();
       
       // Throttle WebSocket updates
       if (now - lastUpdateRef.current < THROTTLE_MS && started) {
         setUserInput(value);
+        setCursorPosition(cursorPos);
         return;
       }
 
       lastUpdateRef.current = now;
       setUserInput(value);
+      setCursorPosition(cursorPos);
 
       // Check for completion first - timer stops when text is completely typed
       if (targetText && value === targetText && !finishedRef.current) {
@@ -214,6 +220,7 @@ export const useTypingSession = (language = 'javascript') => {
   return {
     targetText,
     userInput,
+    cursorPosition,
     seconds,
     started,
     finished,
