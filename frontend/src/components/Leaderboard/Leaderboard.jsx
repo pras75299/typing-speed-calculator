@@ -2,6 +2,18 @@ import React, { useState, useEffect } from 'react';
 import { statsService } from '../../services/statsService';
 import './Leaderboard.css';
 
+// Helper function to safely format numbers
+const formatNumber = (value, decimals = 1) => {
+  if (value === null || value === undefined || value === '') {
+    return '0.0';
+  }
+  const num = typeof value === 'string' ? parseFloat(value) : value;
+  if (isNaN(num)) {
+    return '0.0';
+  }
+  return num.toFixed(decimals);
+};
+
 const Leaderboard = () => {
   const [leaderboard, setLeaderboard] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -14,10 +26,19 @@ const Leaderboard = () => {
   const loadLeaderboard = async () => {
     try {
       setLoading(true);
+      setError('');
       const data = await statsService.getLeaderboard(50);
-      setLeaderboard(data);
+      // Normalize leaderboard data to ensure numbers are properly converted
+      const normalizedData = (data || []).map(entry => ({
+        ...entry,
+        wpm: typeof entry.wpm === 'string' ? parseFloat(entry.wpm) : entry.wpm,
+        accuracy: typeof entry.accuracy === 'string' ? parseFloat(entry.accuracy) : entry.accuracy,
+      }));
+      setLeaderboard(normalizedData);
     } catch (err) {
-      setError(err.response?.data?.error || 'Failed to load leaderboard');
+      const errorMessage = err.response?.data?.error || err.message || 'Failed to load leaderboard';
+      setError(errorMessage);
+      console.error('Error loading leaderboard:', err);
     } finally {
       setLoading(false);
     }
@@ -52,13 +73,13 @@ const Leaderboard = () => {
                   {index + 1}
                 </span>
               </div>
-              <div className="username-col">{entry.username}</div>
+              <div className="username-col">{entry.username || 'Anonymous'}</div>
               <div className="wpm-col">
-                <strong>{entry.wpm?.toFixed(1)}</strong>
+                <strong>{formatNumber(entry.wpm)}</strong>
               </div>
-              <div className="accuracy-col">{entry.accuracy?.toFixed(1)}%</div>
+              <div className="accuracy-col">{formatNumber(entry.accuracy)}%</div>
               <div className="date-col">
-                {new Date(entry.recorded_at).toLocaleDateString()}
+                {entry.recorded_at ? new Date(entry.recorded_at).toLocaleDateString() : 'N/A'}
               </div>
             </div>
           ))}
