@@ -159,3 +159,23 @@
   font-size: 14px;
   line-height: 1.6;
 }
+
+.debug-button {
+  background: #64748b;
+  color: #ffffff;
+  border: none;
+  padding: 8px 12px;
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background 0.2s, transform 0.1s;
+}
+
+.debug-button:hover {
+  background: #475569;
+}
+
+.debug-button:active {
+  transform: translateY(1px);
+}

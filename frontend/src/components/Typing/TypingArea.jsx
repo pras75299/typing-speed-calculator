@@ -1,11 +1,15 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useTypingSession } from '../../hooks/useTypingSession';
 import Preview from '../Preview';
 import Speed from '../Speed';
+import { handleArrowKey, moveCursorHome, moveCursorEnd } from '../../utils/cursorNavigation';
+import { normalizeText } from '../../utils/textNormalization';
 import './TypingArea.css';
 
 const TypingArea = () => {
+  const [debugMode, setDebugMode] = useState(false);
+  
   const {
     targetText,
     userInput,
@@ -26,30 +30,114 @@ const TypingArea = () => {
     const textarea = e.target;
     const value = textarea.value;
     // Get cursor position synchronously - selectionStart is available immediately
-    const cursorPos = textarea.selectionStart;
-    handleInputChange(value, cursorPos);
+    // Use requestAnimationFrame to ensure DOM is updated
+    requestAnimationFrame(() => {
+      const cursorPos = textarea.selectionStart;
+      handleInputChange(value, cursorPos);
+    });
   };
 
-  const handleTextareaKeyUp = (e) => {
-    // Update cursor position after key is released (for arrow keys, home, end, etc.)
-    const textarea = e.target;
-    const cursorPos = textarea.selectionStart;
-    // Only update if cursor position changed (don't trigger full handleInputChange)
-    if (cursorPos !== cursorPosition) {
+  const handleTextareaPaste = (e) => {
+    // Allow paste, but update cursor position after paste
+    // The onChange handler will catch the new value and cursor position
+    setTimeout(() => {
+      const textarea = e.target;
+      const cursorPos = textarea.selectionStart;
       handleInputChange(textarea.value, cursorPos);
-    }
+    }, 0);
   };
 
   const handleTextareaKeyDown = (e) => {
-    // For arrow keys and navigation, update cursor position
-    if (['ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown', 'Home', 'End'].includes(e.key)) {
+    const textarea = e.target;
+    const value = textarea.value;
+    const currentPos = textarea.selectionStart;
+
+    // Handle Tab key - prevent default and insert spaces instead
+    if (e.key === 'Tab') {
+      e.preventDefault();
+      const start = textarea.selectionStart;
+      const end = textarea.selectionEnd;
+      
+      // Insert 2 spaces (common in JavaScript) or 4 spaces (Python style)
+      const spaces = '  ';
+      const newValue = value.substring(0, start) + spaces + value.substring(end);
+      const newCursorPos = start + spaces.length;
+      
+      handleInputChange(newValue, newCursorPos);
+      
+      // Set cursor position after state update
       setTimeout(() => {
-        const textarea = e.target;
+        textarea.selectionStart = newCursorPos;
+        textarea.selectionEnd = newCursorPos;
+      }, 0);
+      return;
+    }
+
+    // Handle Home key - move to start of line
+    if (e.key === 'Home') {
+      e.preventDefault();
+      const normalizedValue = normalizeText(value);
+      const newPos = moveCursorHome(normalizedValue, currentPos);
+      handleInputChange(value, newPos);
+      setTimeout(() => {
+        textarea.selectionStart = newPos;
+        textarea.selectionEnd = newPos;
+      }, 0);
+      return;
+    }
+
+    // Handle End key - move to end of line
+    if (e.key === 'End') {
+      e.preventDefault();
+      const normalizedValue = normalizeText(value);
+      const newPos = moveCursorEnd(normalizedValue, currentPos);
+      handleInputChange(value, newPos);
+      setTimeout(() => {
+        textarea.selectionStart = newPos;
+        textarea.selectionEnd = newPos;
+      }, 0);
+      return;
+    }
+
+    // Handle Arrow keys with improved navigation
+    if (['ArrowUp', 'ArrowDown'].includes(e.key)) {
+      e.preventDefault();
+      const normalizedValue = normalizeText(value);
+      const newPos = handleArrowKey(e.key, normalizedValue, currentPos);
+      handleInputChange(value, newPos);
+      setTimeout(() => {
+        textarea.selectionStart = newPos;
+        textarea.selectionEnd = newPos;
+      }, 0);
+      return;
+    }
+
+    // For ArrowLeft/Right, let browser handle it but update our state
+    if (['ArrowLeft', 'ArrowRight'].includes(e.key)) {
+      // Use setTimeout to ensure browser has processed the key
+      setTimeout(() => {
         const cursorPos = textarea.selectionStart;
         if (cursorPos !== cursorPosition) {
           handleInputChange(textarea.value, cursorPos);
         }
       }, 0);
+    }
+  };
+
+  const handleTextareaKeyUp = (e) => {
+    // Update cursor position after key is released (for all keys except navigation keys we handle)
+    // This ensures cursor position is always up-to-date
+    if (['ArrowUp', 'ArrowDown', 'Home', 'End', 'Tab'].includes(e.key)) {
+      // These are handled in keyDown, skip here
+      return;
+    }
+
+    const textarea = e.target;
+    const cursorPos = textarea.selectionStart;
+    
+    // Only update if cursor position actually changed
+    if (cursorPos !== cursorPosition) {
+      handleInputChange(textarea.value, cursorPos);
     }
   };
 
@@ -107,7 +195,13 @@ const TypingArea = () => {
           </select>
         </div>
 
-        <Preview text={targetText} userInput={userInput} cursorPosition={cursorPosition} language={currentLanguage} />
+        <Preview 
+          text={targetText} 
+          userInput={userInput} 
+          cursorPosition={cursorPosition} 
+          language={currentLanguage}
+          debugMode={debugMode}
+        />
 
         <label className="input__label" htmlFor="typing-area-input">
           Type the code below:
@@ -120,6 +214,7 @@ const TypingArea = () => {
           onKeyUp={handleTextareaKeyUp}
           onClick={handleTextareaClick}
           onSelect={handleTextareaSelect}
+          onPaste={handleTextareaPaste}
           placeholder="Start typing the code here..."
           className="input__area code-input"
           disabled={finished}
@@ -150,6 +245,14 @@ const TypingArea = () => {
         )}
 
         <div className="app__actions">
+          <button 
+            type="button" 
+            onClick={() => setDebugMode(!debugMode)} 
+            className="debug-button"
+            title="Toggle debug mode to see cursor position info"
+          >
+            {debugMode ? '🔍 Debug ON' : '🔍 Debug'}
+          </button>
           <button type="button" onClick={restart} className="restart-button">
             {finished ? 'Try Again' : 'Restart'}
           </button>

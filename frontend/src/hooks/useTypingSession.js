@@ -2,6 +2,7 @@ import { useState, useEffect, useRef, useCallback } from 'react';
 import { sessionService } from '../services/sessionService';
 import { textService } from '../services/textService';
 import websocketService from '../services/websocket';
+import { normalizeText, validateCursorPosition } from '../utils/textNormalization';
 
 export const useTypingSession = (language = 'javascript') => {
   const [targetText, setTargetText] = useState(null);
@@ -27,8 +28,8 @@ export const useTypingSession = (language = 'javascript') => {
     const languageToUse = lang || currentLanguage;
     try {
       const text = await textService.getRandomText(languageToUse);
-      // Normalize text - convert \n to actual newlines
-      const normalizedContent = text.content.replace(/\\n/g, '\n');
+      // Normalize text consistently using utility function
+      const normalizedContent = normalizeText(text.content);
       setTargetText(normalizedContent);
       setTextId(text.id);
       setCurrentLanguage(languageToUse);
@@ -79,16 +80,21 @@ export const useTypingSession = (language = 'javascript') => {
     (value, cursorPos = value.length) => {
       const now = Date.now();
       
+      // Validate cursor position before setting
+      const validatedCursorPos = targetText 
+        ? validateCursorPosition(cursorPos, targetText, value)
+        : Math.max(0, Math.min(cursorPos, value.length));
+      
       // Throttle WebSocket updates
       if (now - lastUpdateRef.current < THROTTLE_MS && started) {
         setUserInput(value);
-        setCursorPosition(cursorPos);
+        setCursorPosition(validatedCursorPos);
         return;
       }
 
       lastUpdateRef.current = now;
       setUserInput(value);
-      setCursorPosition(cursorPos);
+      setCursorPosition(validatedCursorPos);
 
       // Check for completion first - timer stops when text is completely typed
       if (targetText && value === targetText && !finishedRef.current) {

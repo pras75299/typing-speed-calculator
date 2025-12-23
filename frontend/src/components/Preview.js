@@ -1,25 +1,20 @@
-import React from "react";
+import React, { useState } from "react";
 import { Prism as SyntaxHighlighter } from "react-syntax-highlighter";
 import { vscDarkPlus } from "react-syntax-highlighter/dist/esm/styles/prism";
+import {
+  normalizeText,
+  normalizeUserInput,
+  validateCursorPosition,
+  isSpecialChar,
+} from "../utils/textNormalization";
 
 const Preview = ({
   text,
   userInput,
   cursorPosition,
   language = "javascript",
+  debugMode = false, // Optional debug mode
 }) => {
-  // Use actual cursor position if provided, otherwise fall back to input length
-  // Ensure cursorPosition is a valid number
-  const currentPosition =
-    cursorPosition !== undefined && cursorPosition !== null
-      ? Math.max(
-          0,
-          Math.min(cursorPosition, text ? text.replace(/\\n/g, "\n").length : 0)
-        )
-      : userInput
-      ? userInput.length
-      : 0;
-
   // Map language names to Prism language identifiers
   const languageMap = {
     javascript: "javascript",
@@ -32,22 +27,50 @@ const Preview = ({
 
   const prismLanguage = languageMap[language] || "javascript";
 
-  // Normalize text - convert \n to actual newlines
-  const normalizedText = text ? text.replace(/\\n/g, "\n") : "";
+  // Normalize texts consistently
+  const normalizedText = normalizeText(text);
+  const normalizedUserInput = normalizeUserInput(userInput);
 
-  // Normalize userInput - ensure it matches the format of normalizedText
-  const normalizedUserInput = userInput || "";
+  // Validate and get cursor position
+  const currentPosition = validateCursorPosition(
+    cursorPosition,
+    text,
+    userInput
+  );
 
   // Create feedback spans that align with the code
   const createFeedbackOverlay = () => {
-    if (!normalizedText) return null;
+    if (!normalizedText) {
+      // Handle empty text case - show cursor at position 0
+      if (currentPosition === 0) {
+        return (
+          <span
+            key="cursor-start"
+            className="preview__cursor"
+            aria-hidden="true"
+          />
+        );
+      }
+      return null;
+    }
 
     const chars = normalizedText.split("");
     const feedback = [];
 
+    // Handle cursor at start (position 0) - show cursor before first character
+    if (currentPosition === 0) {
+      feedback.push(
+        <span
+          key="cursor-start"
+          className="preview__cursor"
+          aria-hidden="true"
+        />
+      );
+    }
+
     chars.forEach((char, index) => {
-      // ✅ Insert cursor BEFORE the character at currentPosition
-      if (index === currentPosition) {
+      // Insert cursor BEFORE the character at currentPosition
+      if (index === currentPosition && currentPosition > 0) {
         feedback.push(
           <span
             key={`cursor-${index}`}
@@ -59,34 +82,83 @@ const Preview = ({
 
       let className = "preview__char";
 
+      // Check if this character has been typed (compare with normalized userInput)
+      // Only mark as typed if we've actually typed up to this position
       if (index < normalizedUserInput.length) {
         const userChar = normalizedUserInput[index];
-        className += char === userChar ? " correct" : " incorrect";
+        // Compare characters, handling special cases
+        if (char === userChar) {
+          className += " correct";
+        } else {
+          // Special handling for whitespace variations
+          const bothWhitespace =
+            (char === " " || char === "\t" || char === "\n") &&
+            (userChar === " " || userChar === "\t" || userChar === "\n");
+
+          if (bothWhitespace) {
+            // Both are whitespace but different types - mark as incorrect
+            className += " incorrect";
+          } else {
+            className += " incorrect";
+          }
+        }
       }
 
+      // Debug mode: add data attributes for debugging
+      const debugProps = debugMode
+        ? {
+            "data-index": index,
+            "data-char":
+              char === "\n"
+                ? "\\n"
+                : char === "\t"
+                ? "\\t"
+                : char === " "
+                ? " "
+                : char,
+            "data-special": isSpecialChar(char) ? "true" : "false",
+          }
+        : {};
+
+      // Handle different character types for proper rendering
       if (char === "\n") {
         feedback.push(
-          <span key={`char-${index}`} className={className}>
+          <span key={`char-${index}`} className={className} {...debugProps}>
             {"\n"}
           </span>
         );
-      } else if (char === " ") {
+      } else if (char === "\t") {
+        // Render tab as visible spaces for alignment (4 spaces)
         feedback.push(
-          <span key={`char-${index}`} className={className}>
+          <span key={`char-${index}`} className={className} {...debugProps}>
+            {"    "}
+          </span>
+        );
+      } else if (char === " ") {
+        // Use non-breaking space for proper alignment
+        feedback.push(
+          <span key={`char-${index}`} className={className} {...debugProps}>
             {"\u00A0"}
           </span>
         );
       } else {
+        // Regular character or special character (brackets, quotes, operators)
+        // All characters are rendered the same way for consistency
         feedback.push(
-          <span key={`char-${index}`} className={className}>
+          <span
+            key={`char-${index}`}
+            className={className}
+            data-char={isSpecialChar(char) ? char : undefined}
+            {...debugProps}
+          >
             {char}
           </span>
         );
       }
     });
 
-    // ✅ If caret is at the very end (after last char)
-    if (currentPosition === normalizedText.length) {
+    // If caret is at the very end (after last char)
+    if (currentPosition >= normalizedText.length) {
       feedback.push(
         <span key="cursor-end" className="preview__cursor" aria-hidden="true" />
       );
@@ -123,6 +195,7 @@ const Preview = ({
                 'Monaco, Menlo, "Ubuntu Mono", Consolas, "source-code-pro", monospace',
               margin: 0,
               padding: 0,
+              letterSpacing: "0", // Ensure consistent letter spacing
             },
           }}
           wrapLines={true}
@@ -137,24 +210,31 @@ const Preview = ({
         className="preview-overlay"
         aria-label="code preview with typing feedback"
       >
-        <pre
+        <pre>{createFeedbackOverlay()}</pre>
+      </div>
+
+      {/* Debug info (only in debug mode) */}
+      {debugMode && (
+        <div
           style={{
-            margin: 0,
-            padding: "16px",
-            fontFamily:
-              'Monaco, Menlo, "Ubuntu Mono", Consolas, "source-code-pro", monospace',
-            fontSize: "14px",
-            lineHeight: "1.6",
-            whiteSpace: "pre-wrap",
-            wordWrap: "break-word",
-            overflowWrap: "break-word",
-            color: "transparent",
-            overflow: "auto",
+            position: "absolute",
+            top: "8px",
+            right: "8px",
+            background: "rgba(0, 0, 0, 0.8)",
+            color: "#fff",
+            padding: "8px",
+            borderRadius: "4px",
+            fontSize: "12px",
+            fontFamily: "monospace",
+            zIndex: 10,
           }}
         >
-          {createFeedbackOverlay()}
-        </pre>
-      </div>
+          <div>Pos: {currentPosition}</div>
+          <div>Text Len: {normalizedText.length}</div>
+          <div>Input Len: {normalizedUserInput.length}</div>
+          <div>Char: {normalizedText[currentPosition] || "END"}</div>
+        </div>
+      )}
     </div>
   );
 };

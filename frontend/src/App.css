@@ -25,6 +25,17 @@
   white-space: pre-wrap !important;
   word-wrap: break-word !important;
   overflow-wrap: break-word !important;
+  tab-size: 4 !important;
+  -moz-tab-size: 4 !important;
+}
+
+.preview-syntax-highlight code {
+  font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', 'Consolas', 'source-code-pro', monospace !important;
+  font-size: 14px !important;
+  line-height: 1.6 !important;
+  letter-spacing: 0 !important;
+  tab-size: 4 !important;
+  -moz-tab-size: 4 !important;
 }
 
 .preview-overlay {
@@ -39,6 +50,24 @@
   padding: 0;
   box-sizing: border-box;
   overflow: hidden;
+  /* Ensure exact alignment with syntax highlighter */
+  display: flex;
+  align-items: flex-start;
+}
+
+.preview-overlay pre {
+  /* Match syntax highlighter exactly */
+  margin: 0 !important;
+  padding: 16px !important;
+  font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', 'Consolas', 'source-code-pro', monospace !important;
+  font-size: 14px !important;
+  line-height: 1.6 !important;
+  letter-spacing: 0 !important;
+  white-space: pre-wrap !important;
+  word-wrap: break-word !important;
+  overflow-wrap: break-word !important;
+  tab-size: 4 !important;
+  -moz-tab-size: 4 !important;
 }
 
 .preview__char {
@@ -180,6 +209,8 @@
 .app__actions {
   display: flex;
   justify-content: flex-end;
+  gap: 12px;
+  align-items: center;
 }
 
 .app__actions button {
@@ -199,5 +230,25 @@
 }
 
 .app__actions button:active {
+  transform: translateY(1px);
+}
+
+.debug-button {
+  background: #64748b;
+  color: #ffffff;
+  border: none;
+  padding: 8px 12px;
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background 0.2s, transform 0.1s;
+}
+
+.debug-button:hover {
+  background: #475569;
+}
+
+.debug-button:active {
   transform: translateY(1px);
 }
